@@ -9,13 +9,14 @@
 #include <fcntl.h>
 
 int main(int argc, char *argv[]) {
+    // Parse target ip address and port from arguments.
     if (argc < 3) {
         printf("invalid arguments [<ip> <port>]\n");
         exit(EXIT_FAILURE);
     }
 
+    // Creact socket.
     int socket_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
     if (socket_fd == -1) {
         perror("cannot create socket");
         exit(EXIT_FAILURE);
@@ -25,6 +26,7 @@ int main(int argc, char *argv[]) {
     size_t addr_len = sizeof(struct sockaddr_in);
     memset(&st_sockaddr, 0, sizeof(struct sockaddr_in));
 
+    // Configure socket info..
     char *ip_address = argv[1];
     st_sockaddr.sin_family = PF_INET;
     st_sockaddr.sin_port = htons(atoi(argv[2]));
@@ -41,18 +43,19 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    // Send connection request.
     if (connect(socket_fd, (struct sockaddr *)&st_sockaddr, addr_len) < 0) {
         perror("error connect failed");
         close(socket_fd);
         exit(EXIT_FAILURE);
     }
-
     printf("connected\n");
 
     char msg[1024];
     char buf[1024];
     size_t read_len;
     while (1) {
+        // Read message from user and send to server.
         printf("send message [q to quit]:\n\t");
         scanf("%s", msg);
 
