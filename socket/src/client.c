@@ -9,6 +9,10 @@
 #include <fcntl.h>
 
 int main(int argc, char *argv[]) {
+    if (argc < 3) {
+        printf("invalid arguments [<ip> <port>]\n");
+        exit(EXIT_FAILURE);
+    }
 
     int socket_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -21,9 +25,10 @@ int main(int argc, char *argv[]) {
     size_t addr_len = sizeof(struct sockaddr_in);
     memset(&st_sockaddr, 0, sizeof(struct sockaddr_in));
 
+    char *ip_address = argv[1];
     st_sockaddr.sin_family = PF_INET;
-    st_sockaddr.sin_port = htons(atoi(argv[1]));
-    int res = inet_pton(PF_INET, "127.0.0.1", &st_sockaddr.sin_addr);
+    st_sockaddr.sin_port = htons(atoi(argv[2]));
+    int res = inet_pton(PF_INET, ip_address, &st_sockaddr.sin_addr);
 
     if (res < 0) {
         perror("error: first parameter is not a valid address family");
