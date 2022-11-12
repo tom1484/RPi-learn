@@ -44,25 +44,35 @@ int main(int argc, char *argv[]) {
 
     printf("connected\n");
 
-    char msg[1024] = "hello";
-    if (send(socket_fd, msg, sizeof(msg), 0) < 0) {
-        perror("error send failed");
-        close(socket_fd);
-        exit(EXIT_FAILURE);
-    }
-
+    char msg[1024];
     char buf[1024];
-    if (recv(socket_fd, buf, sizeof(buf), 0) < 0) {
-        perror("error read failed");
-        close(socket_fd);
-        exit(EXIT_FAILURE);
+    size_t read_len;
+    while (1) {
+        printf("send message [q to quit]:\n\t");
+        scanf("%s", msg);
+
+        if (strcmp(msg, "q") == 0) {
+            printf("quit\n");
+            break;
+        }
+        else {
+            if (send(socket_fd, msg, strlen(msg), 0) < 0) {
+                perror("error send failed");
+                close(socket_fd);
+                exit(EXIT_FAILURE);
+            }
+            if ((read_len = recv(socket_fd, buf, sizeof(buf), 0)) < 0) {
+                perror("error read failed");
+                close(socket_fd);
+                exit(EXIT_FAILURE);
+            }
+            buf[read_len] = '\0';
+            printf("received response:\n\t%s\n", buf);
+        }
     }
-    printf("Received: %s\n", buf);
 
-    /* sleep(5); */
-
-    /* shutdown(socket_fd, SHUT_RDWR); */
-    /* close(socket_fd); */
+    shutdown(socket_fd, SHUT_RDWR);
+    close(socket_fd);
 
     return 0;
 }
