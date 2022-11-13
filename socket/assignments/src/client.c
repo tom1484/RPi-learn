@@ -54,56 +54,60 @@ int main(int argc, char *argv[]) {
     printf("connected\n");
 
     int count = 0;
-    char command[32];
+    char action[32];
     int com_num;
 
     char msg[1024];
     char buf[1024];
     size_t read_len;
     while (1) {
+        // Exit if error occurred.
         if ((read_len = recv(socket_fd, buf, sizeof(buf), 0)) < 0) {
             perror("error read failed");
             close(socket_fd);
             exit(EXIT_FAILURE);
         }
+        // Disconnect if received nothing.
         else if (read_len == 0) {
             printf("disconnected\n");
             break;
         }
         else {
             buf[read_len] = '\0';
-            /* printf("%s\n", buf); */
 
+            // Separate action and number by space.
             char *ptr = strtok(buf, " ");
-            strcpy(command, ptr);
+            strcpy(action, ptr);
 
             ptr = strtok(NULL, " ");
             if (ptr == NULL) {
                 sprintf(msg, "invalid command");
             }
             else {
+                // Parse number from string.
                 char *end;
                 com_num = strtol(ptr, &end, 10);
                 if (end == ptr || errno != 0) {
-                    sprintf(msg, "invalid command");
+                    sprintf(msg, "invalid number");
                 }
                 else {
+                    // Check if action is valid and execute if it is.
                     bool com_exist = 1;
-                    if (strcmp(command, "add") == 0) {
+                    if (strcmp(action, "add") == 0) {
                         count += com_num;
                     }
-                    else if (strcmp(command, "sub") == 0) {
+                    else if (strcmp(action, "sub") == 0) {
                         count -= com_num;
                     }
-                    else if (strcmp(command, "mul") == 0) {
+                    else if (strcmp(action, "mul") == 0) {
                         count *= com_num;
                     }
-                    else if (strcmp(command, "div") == 0) {
+                    else if (strcmp(action, "div") == 0) {
                         count /= com_num;
                     }
                     else {
                         com_exist = false;
-                        sprintf(msg, "invalid command");
+                        sprintf(msg, "invalid action");
                     }
 
                     if (com_exist) {

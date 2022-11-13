@@ -56,6 +56,8 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
     while (1) {
+        // If no client is set, try to connect to new one.
+        // Otherwise just ignore.
         if (client_fd == 0) {
             if ((client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_len)) < 0) {
                 perror("accept");
@@ -64,6 +66,7 @@ int main(int argc, char *argv[]) {
             printf("new connection from %s:%d\n", 
                     inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
         }
+        // If connection exists, read command from user and send.
         else {
             printf("command: ");
 
@@ -80,11 +83,13 @@ int main(int argc, char *argv[]) {
 
             send(client_fd, msg, strlen(msg), 0);
 
+            // Exit if I/O failed.
             if ((read_len = recv(client_fd, buf, 1024, 0)) < 0) {
                 perror("error read failed");
                 close(client_fd);
                 exit(EXIT_FAILURE);
             }
+            // Disconnect if received nothing.
             else if (read_len == 0) {
                 getpeername(client_fd, (struct sockaddr *)&client_addr, &client_len);
                 printf("host %s:%d disconnectd\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
