@@ -27,7 +27,6 @@ int main() {
 
             argv[argc] = malloc(n_cpy);
             strncpy(argv[argc], sp_ptr, n_cpy);
-            printf("%s\n", argv[argc]);
             argc++;
 
             sp_ptr += n_cpy;
@@ -41,7 +40,8 @@ int main() {
         pid_t pid = fork();
         if (pid == 0) {
             // If it's a child, execute the given command.
-            execv(argv[0], argv);
+            /* printf("%s", argv[0]); */
+            execvp(argv[0], argv);
         }
 
         // Wait for child ending.
