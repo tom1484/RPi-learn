@@ -9,11 +9,13 @@
 #include <fcntl.h>
 #include <errno.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 
     // Create socket.
     int server_fd;
-    if ((server_fd = socket(PF_INET, SOCK_STREAM, 0)) == 0) {
+    if ((server_fd = socket(PF_INET, SOCK_STREAM, 0)) == 0)
+    {
         perror("can not create socket");
         exit(EXIT_FAILURE);
     }
@@ -31,14 +33,16 @@ int main(int argc, char *argv[]) {
 
     // Bind socket address and file descriptor so that incoming
     // connections to the address are associated with the descriptor.
-    if (bind(server_fd, (const struct sockaddr *)&server_addr, addr_len)) {
+    if (bind(server_fd, (const struct sockaddr *)&server_addr, addr_len))
+    {
         perror("error bind failed");
         close(server_fd);
         exit(EXIT_FAILURE);
     }
 
     // Start listen to socket with maximum queue size N.
-    if (listen(server_fd, 10) == -1) {
+    if (listen(server_fd, 10) == -1)
+    {
         perror("error listen failed");
         close(server_fd);
         exit(EXIT_FAILURE);
@@ -55,23 +59,28 @@ int main(int argc, char *argv[]) {
     int client_fd = 0;
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
-    while (1) {
+    while (1)
+    {
         // If no client is set, try to connect to new one.
         // Otherwise just ignore.
-        if (client_fd == 0) {
-            if ((client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_len)) < 0) {
+        if (client_fd == 0)
+        {
+            if ((client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_len)) < 0)
+            {
                 perror("accept");
                 exit(EXIT_FAILURE);
             }
-            printf("new connection from %s:%d\n", 
-                    inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+            printf("new connection from %s:%d\n",
+                   inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
         }
         // If connection exists, read command from user and send.
-        else {
+        else
+        {
             printf("command: ");
 
             scanf("%s", command);
-            if (strcmp(command, "q") == 0) {
+            if (strcmp(command, "q") == 0)
+            {
                 printf("quit\n");
 
                 close(client_fd);
@@ -84,20 +93,23 @@ int main(int argc, char *argv[]) {
             send(client_fd, msg, strlen(msg), 0);
 
             // Exit if I/O failed.
-            if ((read_len = recv(client_fd, buf, 1024, 0)) < 0) {
+            if ((read_len = recv(client_fd, buf, 1024, 0)) < 0)
+            {
                 perror("error read failed");
                 close(client_fd);
                 exit(EXIT_FAILURE);
             }
             // Disconnect if received nothing.
-            else if (read_len == 0) {
+            else if (read_len == 0)
+            {
                 getpeername(client_fd, (struct sockaddr *)&client_addr, &client_len);
                 printf("host %s:%d disconnectd\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
                 close(client_fd);
                 client_fd = 0;
             }
-            else {
+            else
+            {
                 buf[read_len] = '\0';
                 printf("reply: %s\n", buf);
             }
